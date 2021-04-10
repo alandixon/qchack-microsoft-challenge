@@ -1,11 +1,12 @@
 namespace QCHack.Task1 {
+    open Microsoft.Quantum.Diagnostics;
     open Microsoft.Quantum.Canon;
     open Microsoft.Quantum.Intrinsic;
 
     // Task 1 (1 point). f(x) = 1 if x is divisible by 4
     //         
     // Inputs:
-    //      1) an N-qubit array "inputs" (3 ≤ N ≤ 5),
+    //      1) an N-qubit array "inputs" (3 ≤ N ≤ 5), i.e. 0 ≤ x ≤ 31
     //      2) a qubit "output".
     // Goal: Implement a marking oracle for function f(x) = 1 if x is divisible by 4.
     //       That is, if both inputs are in a basis state, flip the state of the output qubit 
@@ -21,7 +22,42 @@ namespace QCHack.Task1 {
     // will be 1/√3|001⟩ ⊗ |1⟩ + 1/√3|100⟩ ⊗ |0⟩ + 1/√3|111⟩ ⊗ |0⟩.
     //
     operation Task1_DivisibleByFour (inputs : Qubit[], output : Qubit) : Unit is Adj+Ctl {
-        // ...
+
+        // Different approaches
+        let mode = 2;
+
+        if (mode == 1)
+        {
+            // Divisibility by 4; look for 2 LS bits to be 0 
+            // Set to 1
+	        X(inputs[0]);
+	        X(inputs[1]);
+
+            // Process
+	        CCNOT(inputs[0], inputs[1], output);
+
+            // return to original state
+	        X(inputs[0]);
+	        X(inputs[1]);
+	    }
+
+        elif (mode == 2)
+        {
+            // Use the "compute - process - uncompute" pattern
+            //DumpMachine();
+            within {
+                ApplyToEachA(X,inputs[0..1]);
+            }
+            apply {
+                CCNOT(inputs[0],inputs[1],output);
+            }
+	    }
+
+        elif (mode == 3)
+        {
+            ApplyControlledOnBitString([false,false], X, inputs[0..1], output);
+	    }
+
     }
 }
 
